@@ -1,0 +1,7 @@
+{
+  "name": "B-Roll Studio AI",
+  "description": "An AI-powered platform to generate video b-rolls and edit images for your ad campaigns. Features voice-to-text prompts, a media library, and an AI support chatbot.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
