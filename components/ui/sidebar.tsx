@@ -1,4 +1,3 @@
-
 import { cn } from "../../lib/utils";
 import React, { useState, createContext, useContext } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -49,7 +48,8 @@ export const SidebarProvider = ({
   );
 };
 
-export const Sidebar = (props: SidebarComponentProps) => {
+// FIX: Explicitly typed `Sidebar` as a `React.FC` to correctly handle the `children` prop.
+export const Sidebar: React.FC<SidebarComponentProps> = (props) => {
   return (
     <SidebarProvider {...props} />
   );
@@ -149,13 +149,14 @@ interface SidebarLinkProps {
     onClick: (view: View) => void;
 }
 
-export const SidebarLink = ({
+// FIX: Explicitly typed `SidebarLink` as a `React.FC` to allow the use of the special `key` prop.
+export const SidebarLink: React.FC<SidebarLinkProps> = ({
   view,
   label,
   icon,
   currentView,
   onClick,
-}: SidebarLinkProps) => {
+}) => {
   const { open, animate } = useSidebar();
   const isActive = currentView === view;
 

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { generateScript } from '../services/geminiService';
 import { fileToBase64 } from '../utils/fileUtils';
@@ -14,6 +13,8 @@ const ScriptWriter: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [generatedScript, setGeneratedScript] = useState<string | null>(null);
+  const [rawScriptParagraph, setRawScriptParagraph] = useState<string>('');
+  const [isCopied, setIsCopied] = useState(false);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -27,6 +28,14 @@ const ScriptWriter: React.FC = () => {
     }
   };
   
+  const handleCopy = () => {
+    if (!rawScriptParagraph) return;
+    navigator.clipboard.writeText(rawScriptParagraph).then(() => {
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!prompt) {
@@ -36,6 +45,7 @@ const ScriptWriter: React.FC = () => {
     setError(null);
     setIsLoading(true);
     setGeneratedScript(null);
+    setRawScriptParagraph('');
 
     try {
       const base64Image = imageFile ? await fileToBase64(imageFile) : null;
@@ -44,6 +54,15 @@ const ScriptWriter: React.FC = () => {
       const script = await generateScript(prompt, audience, useThinkingMode, base64Image, mimeType);
       
       setGeneratedScript(script);
+
+      const rawText = script
+        .replace(/^[A-Z\s]+:/gm, '')
+        .replace(/\(.*\)/g, '')
+        .replace(/\n/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      setRawScriptParagraph(rawText);
+
     } catch (err) {
        if (err instanceof Error) {
             setError(`Generation failed: ${err.message}`);
@@ -121,9 +140,29 @@ const ScriptWriter: React.FC = () => {
         )}
         {error && <p className="text-center text-red-400 p-4 bg-red-900/20 rounded-lg">{error}</p>}
         {generatedScript && !isLoading && (
-          <div className="bg-gray-800 p-6 rounded-xl shadow-2xl">
-            <h3 className="text-xl font-bold mb-4 text-white">Generated Script</h3>
-            <pre className="bg-gray-900/50 p-4 rounded-lg text-gray-200 whitespace-pre-wrap font-sans text-sm">{generatedScript}</pre>
+          <div className="bg-gray-800 p-6 rounded-xl shadow-2xl space-y-6">
+            <div>
+              <h3 className="text-xl font-bold mb-4 text-white">Generated Script</h3>
+              <pre className="bg-gray-900/50 p-4 rounded-lg text-gray-200 whitespace-pre-wrap font-sans text-sm h-96 overflow-y-auto">{generatedScript}</pre>
+            </div>
+            <div>
+              <h3 className="text-xl font-bold mb-4 text-white">Raw Paragraph Version</h3>
+              <div className="relative">
+                <textarea
+                  readOnly
+                  value={rawScriptParagraph}
+                  className="w-full bg-gray-900/50 p-4 rounded-lg text-gray-300 whitespace-pre-wrap font-sans text-sm resize-none pr-12"
+                  rows={5}
+                />
+                <button
+                  onClick={handleCopy}
+                  className="absolute top-3 right-3 p-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors"
+                  title={isCopied ? "Copied!" : "Copy to clipboard"}
+                >
+                  <Icon name={isCopied ? "check" : "copy"} className="w-5 h-5 text-gray-300" />
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

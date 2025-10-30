@@ -8,6 +8,7 @@ import Library from './components/Library';
 import Chatbot from './components/Chatbot';
 import ScriptWriter from './components/ScriptWriter';
 import ImageAnalyzer from './components/ImageAnalyzer';
+import VoiceoverGenerator from './components/VoiceoverGenerator';
 import { BrollAsset, View } from './types';
 import ApiKeySelector from './components/ApiKeySelector';
 import { Sidebar, SidebarBody, SidebarLink } from './components/ui/sidebar';
@@ -23,12 +24,13 @@ const App: React.FC = () => {
     { id: View.Image, label: 'Image Editor', icon: <Icon name="image" className="w-5 h-5 text-gray-400" /> },
     { id: View.Script, label: 'Script Writer', icon: <Icon name="script" className="w-5 h-5 text-gray-400" /> },
     { id: View.Analyzer, label: 'Image Analyzer', icon: <Icon name="analyzer" className="w-5 h-5 text-gray-400" /> },
+    { id: View.Voiceover, label: 'AI Voiceover', icon: <Icon name="voiceover" className="w-5 h-5 text-gray-400" /> },
     { id: View.Library, label: 'B-Roll Library', icon: <Icon name="library" className="w-5 h-5 text-gray-400" /> },
   ];
 
   const addToLibrary = useCallback((asset: Omit<BrollAsset, 'id'>) => {
     setLibrary(prev => [...prev, { ...asset, id: Date.now().toString() }]);
-    if (asset.type === 'video') {
+    if (asset.type === 'video' || asset.type === 'audio') {
       setView(View.Library);
     }
   }, []);
@@ -49,6 +51,8 @@ const App: React.FC = () => {
         return <ScriptWriter />;
       case View.Analyzer:
         return <ImageAnalyzer />;
+      case View.Voiceover:
+        return <VoiceoverGenerator addToLibrary={addToLibrary} />;
       case View.Library:
         return <Library assets={library} />;
       default:

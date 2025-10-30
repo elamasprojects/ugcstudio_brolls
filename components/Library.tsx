@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { BrollAsset } from '../types';
 import { Icon } from './Icon';
@@ -7,7 +8,7 @@ interface LibraryProps {
   assets: BrollAsset[];
 }
 
-type FilterType = 'all' | 'image' | 'video';
+type FilterType = 'all' | 'image' | 'video' | 'audio';
 type SortType = 'newest' | 'oldest';
 
 const Library: React.FC<LibraryProps> = ({ assets }) => {
@@ -64,7 +65,7 @@ const Library: React.FC<LibraryProps> = ({ assets }) => {
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4 p-4 bg-gray-800/50 rounded-xl">
         <div className="flex items-center bg-gray-900 p-1.5 rounded-lg">
-          {(['all', 'image', 'video'] as FilterType[]).map(type => (
+          {(['all', 'image', 'video', 'audio'] as FilterType[]).map(type => (
             <button key={type} onClick={() => setFilterType(type)} className={getFilterButtonClass(type)}>
               {type.charAt(0).toUpperCase() + type.slice(1)}s
             </button>
@@ -92,8 +93,12 @@ const Library: React.FC<LibraryProps> = ({ assets }) => {
               <div className="aspect-video bg-black flex items-center justify-center">
                 {asset.type === 'image' ? (
                   <img src={asset.url} alt={asset.prompt} className="object-contain w-full h-full" />
-                ) : (
+                ) : asset.type === 'video' ? (
                   <video src={asset.url} controls loop className="w-full h-full" />
+                ) : (
+                  <div className="w-full h-full p-4 flex items-center">
+                    <audio src={asset.url} controls className="w-full" />
+                  </div>
                 )}
               </div>
               <div className="p-4">
