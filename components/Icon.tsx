@@ -1,11 +1,11 @@
 import React from 'react';
 
-interface IconProps {
+// FIX: Extended IconProps to allow passing standard SVG element props like `onClick`.
+interface IconProps extends React.ComponentProps<'svg'> {
   name: string;
-  className?: string;
 }
 
-export const Icon: React.FC<IconProps> = ({ name, className = 'w-6 h-6' }) => {
+export const Icon: React.FC<IconProps> = ({ name, className = 'w-6 h-6', ...props }) => {
   // FIX: Changed type from JSX.Element to React.ReactNode to resolve namespace conflict.
   const icons: { [key: string]: React.ReactNode } = {
     video: <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9A2.25 2.25 0 0 0 13.5 5.25h-9A2.25 2.25 0 0 0 2.25 7.5v9A2.25 2.25 0 0 0 4.5 18.75Z" />,
@@ -27,7 +27,7 @@ export const Icon: React.FC<IconProps> = ({ name, className = 'w-6 h-6' }) => {
     check: <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />,
   };
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className} {...props}>
       {icons[name] || <circle cx="12" cy="12" r="10" />}
     </svg>
   );
