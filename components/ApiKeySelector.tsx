@@ -1,17 +1,16 @@
-
 import React, { useState, useEffect, useCallback, ReactNode } from 'react';
 import { Icon } from './Icon';
 
-// FIX: Define the AIStudio interface and use it for window.aistudio
-// to resolve the type conflict error, as suggested by the error message.
-interface AIStudio {
-  hasSelectedApiKey: () => Promise<boolean>;
-  openSelectKey: () => Promise<void>;
-}
-
+// FIX: Moved the `AIStudio` interface into the `declare global` block to ensure it's a true global
+// type and resolved subsequent declaration errors. Made `aistudio` optional to match usage.
 declare global {
+  interface AIStudio {
+    hasSelectedApiKey: () => Promise<boolean>;
+    openSelectKey: () => Promise<void>;
+  }
+
   interface Window {
-    aistudio: AIStudio;
+    aistudio?: AIStudio;
   }
 }
 

@@ -3,6 +3,8 @@ export enum View {
   Video = 'video',
   Image = 'image',
   Library = 'library',
+  Script = 'script',
+  Analyzer = 'analyzer',
 }
 
 export interface BrollAsset {

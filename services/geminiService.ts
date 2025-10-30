@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Modality, Chat, GenerateContentResponse } from "@google/genai";
-import type { VideoGenerationReferenceImage, GenerateVideosOperation } from "@google/genai";
+import type { VideoGenerationReferenceImage, GenerateVideosOperation, GenerateContentParameters, GenerateContentResponse as GenerateContentResponseType } from "@google/genai";
 
 // VEO generation can take several minutes. These are reassuring messages for the user.
 export const VEO_LOADING_MESSAGES = [
@@ -113,4 +113,70 @@ export const createChat = (): Chat => {
             systemInstruction: "You are a helpful and friendly support assistant for B-Roll Studio AI. You help users understand how to use the app to generate videos and images.",
         },
     });
+};
+
+export const analyzeImage = async (prompt: string, base64ImageData: string, mimeType: string): Promise<string> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+  const response: GenerateContentResponseType = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: {
+        parts: [
+            {
+                inlineData: {
+                    data: base64ImageData,
+                    mimeType: mimeType,
+                },
+            },
+            {
+                text: prompt,
+            },
+        ],
+    },
+  });
+  return response.text;
+};
+
+export const generateScript = async (
+  prompt: string,
+  audience: string,
+  useThinkingMode: boolean,
+  base64ImageData: string | null,
+  mimeType: string | null
+): Promise<string> => {
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+  
+  const systemInstruction = "Crea un script para un video que sea contenido UGC, que sea natural, que sea un tono casual, y que se note que la persona está dando como su opinión sobre el producto o servicio, en caso de estar vendiendo algo, y no tanto vendiéndolo como si fuese un vendedor de la compañía, sino un contenido súper natural.";
+
+  const request: GenerateContentParameters = {
+    model: '',
+    config: {
+      systemInstruction: systemInstruction,
+    },
+    contents: { parts: [] }
+  };
+
+  const userTextPrompt = `Contexto: ${prompt}\nAudiencia Objetivo: ${audience}`;
+
+  if (base64ImageData && mimeType) {
+    request.model = 'gemini-2.5-flash';
+    request.contents.parts.push({
+      inlineData: {
+        data: base64ImageData,
+        mimeType: mimeType,
+      },
+    });
+    request.contents.parts.push({ text: `Analiza esta imagen y, basándote en ella, crea el script con el siguiente contexto:\n${userTextPrompt}` });
+  } else {
+    request.contents.parts.push({ text: userTextPrompt });
+    if (useThinkingMode) {
+      request.model = 'gemini-2.5-pro';
+      request.config!.thinkingConfig = { thinkingBudget: 32768 };
+    } else {
+      request.model = 'gemini-2.5-flash';
+    }
+  }
+
+  const response = await ai.models.generateContent(request);
+
+  return response.text;
 };
